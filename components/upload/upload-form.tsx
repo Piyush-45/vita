@@ -10,6 +10,8 @@ import { toast } from 'sonner';
 import { generatePdfSummary, storePdfSummaryAction } from '@/actions/upload-action';
 import Summary from '../common/Summary';
 import { parseAISummary, ParsedSummary } from '@/lib/parseSummary';
+import { ClientUploadedFileData } from 'uploadthing/types';
+import LoadingScreen from './LoadingScreen';
 
 
 // Zod schema for file validation
@@ -25,10 +27,10 @@ const schema = z.object({
 const UploadForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [parsedSummary, setParsedSummary] = useState<ParsedSummary | null>(null);
-    const [rawSummary, setRawSummary] = useState<string>("");
+
 
     const { startUpload } = useUploadThing('pdfUploader', {
-        onClientUploadComplete: () => toast.success("Your PDF has been uploaded successfully"),
+        onClientUploadComplete: () => { toast.success("Your PDF has been uploaded successfully") },
         onUploadError: (error: any) => {
             toast.error('Error occurred while uploading');
             console.error('Upload error:', error);
@@ -54,11 +56,14 @@ const UploadForm = () => {
 
         setIsLoading(true);
         setParsedSummary(null);
-        setRawSummary("");
+
 
         // Start upload process
         const uploadToastId = toast.loading('Uploading PDF...');
-        const resp = await startUpload([file]);
+        const resp = await startUpload([file]) as [ClientUploadedFileData<{ uploadedBy: string; file: { url: string; name: string; } }>];
+
+        // now resp[0] is guaranteed
+
 
         if (!resp) {
             toast.error('Upload Failed', { id: uploadToastId });
@@ -79,23 +84,33 @@ const UploadForm = () => {
 
             // Save the raw summary text
             const summaryText = summary.data.summary;
-            setRawSummary(summaryText);
+
 
             // Save summary to DB using correct fields
-            await storePdfSummaryAction({
-                summary: summaryText,
-                fileUrl: resp[0].serverData.file.url,
-                fileName: resp[0].serverData.file.name,
-                title: summary.data.title ?? "Untitled"
-            });
+
 
             // Parse the summary text into structured data
             try {
                 const parsed = parseAISummary(summaryText);
                 setParsedSummary(parsed);
+
+                await storePdfSummaryAction({
+                    summary: summaryText,
+                    fileUrl: resp[0].serverData.file.url,
+                    fileName: resp[0].serverData.file.name,
+                    title: summary.data.title ?? "Untitled"
+                });
             } catch (error) {
                 console.error("Error parsing summary:", error);
                 toast.error("Error formatting summary. Displaying raw version.");
+
+                // If parsing fails, still save raw summary?
+                await storePdfSummaryAction({
+                    summary: summaryText,
+                    fileUrl: resp[0].serverData.file.url,
+                    fileName: resp[0].serverData.file.name,
+                    title: summary.data.title ?? "Untitled"
+                });
             }
         }
 
@@ -106,14 +121,10 @@ const UploadForm = () => {
         <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
             <UploadFormInput onSubmit={onSubmit} isLoading={isLoading} />
 
-            {/* Conditionally render summary */}
-            {parsedSummary ? (
-                <Summary parsedSummary={parsedSummary} rawSummary={rawSummary} />
-            ) : rawSummary ? (
-                <div className="mt-6 p-4 border rounded-lg">
-                    <h3 className="text-lg font-semibold mb-2">Raw Summary (Parsing Failed)</h3>
-                    <pre className="whitespace-pre-wrap">{rawSummary}</pre>
-                </div>
+            {isLoading ? (
+                <LoadingScreen />
+            ) : parsedSummary ? (
+                <Summary parsedSummary={parsedSummary} />
             ) : null}
         </div>
     );

@@ -15,7 +15,7 @@ const page = () => {
       <BgGradient />
       <div className="flex flex-col">
         <HeroSection />
-        <DemoSection />
+        {/* <DemoSection /> */}
         <HowItWorksSection />
         <PricingSection />
       </div>

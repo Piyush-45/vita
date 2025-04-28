@@ -2,11 +2,20 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-//     apiVersion: "2025-02-24.acacia",
-// });
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+// Configure this route to only run at runtime, not during build
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(req: Request) {
+    // Check for required environment variables
+    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+        console.error("Missing required environment variables");
+        return new NextResponse("Server configuration error", { status: 500 });
+    }
+
+    // Initialize Stripe inside the function
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+
     try {
         const payload = await req.text();
         const sig = req.headers.get("stripe-signature")!;

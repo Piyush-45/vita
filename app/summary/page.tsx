@@ -3,7 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 import React from 'react';
 
+export const dynamic = 'force-dynamic';
 const SummaryPage = async () => {
+
     const { userId } = await auth();
 
     if (!userId) {

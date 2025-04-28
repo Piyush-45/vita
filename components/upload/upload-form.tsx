@@ -98,7 +98,8 @@ const UploadForm = () => {
                     summary: summaryText,
                     fileUrl: resp[0].serverData.file.url,
                     fileName: resp[0].serverData.file.name,
-                    title: summary.data.title ?? "Untitled"
+                    title: summary.data.title ?? "Untitled",
+
                 });
             } catch (error) {
                 console.error("Error parsing summary:", error);
@@ -109,7 +110,7 @@ const UploadForm = () => {
                     summary: summaryText,
                     fileUrl: resp[0].serverData.file.url,
                     fileName: resp[0].serverData.file.name,
-                    title: summary.data.title ?? "Untitled"
+                    title: summary.data.title ?? "Untitled",
                 });
             }
         }

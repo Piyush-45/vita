@@ -36,7 +36,8 @@ const Summary: React.FC<SummaryProps> = ({ parsedSummary }) => {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto">
+        // ! added this moring (text-center)
+        <div className="w-full max-w-4xl mx-auto text-center">
             <motion.h2
                 className="text-3xl font-bold mb-8 text-center text-teal-700"
                 initial={{ opacity: 0, y: -10 }}

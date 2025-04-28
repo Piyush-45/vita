@@ -3,7 +3,6 @@ import React from 'react'
 import NavLink from './nav-link'
 import { SignedIn, SignedOut, SignIn, UserButton } from '@clerk/nextjs'
 import { Button } from '../ui/button'
-import { createTestUser } from '@/lib/prisma'
 
 const Header = () => {
 
@@ -22,7 +21,7 @@ const Header = () => {
             <div className="flex lg:justify-center gap-4 lg:gap-12 lg:items-center">
                 <NavLink href="/#pricing">Pricing</NavLink>
                 <SignedIn>
-                    <NavLink href="/dashboard">Your Summaries</NavLink>
+                    <NavLink href="/summary">Your Summaries</NavLink>
 
                 </SignedIn>
             </div>

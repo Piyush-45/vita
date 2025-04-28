@@ -135,6 +135,7 @@ export async function storePdfSummaryAction({
     summary,
     title,
     fileName,
+
 }: PdfSummaryType) {
     console.log("[Action] storePdfSummaryAction called");
 

@@ -25,6 +25,7 @@ model PdfSummary {
   userId          String
   originalFileUrl String
   summaryText     String
+  // parsedSummary   Json? // 👈 NEW FIELD to store parsed data
   status          String   @default("completed")
   title           String?
   fileName        String?

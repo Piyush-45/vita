@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   title: "Summarizer",
   description: "Get meaningful summaries for your pdfs",
 };
+export const dynamic = 'force-dynamic';
+
 
 export default function RootLayout({
   children,

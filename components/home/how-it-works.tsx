@@ -10,19 +10,19 @@ type Step = {
 
 const steps: Step[] = [
     {
-        icon: <FileText size={64} strokeWidth={1.5} />,
-        label: 'Upload your PDF',
-        description: 'Upload your PDF file to get started',
+        icon: <FileText size={64} strokeWidth={2} />,
+        label: 'Upload Your Report',
+        description: 'Upload the confusing stuff you got from the lab',
     },
     {
-        icon: <BrainCircuit size={64} strokeWidth={1.5} />,
-        label: 'AI Analysis',
-        description: 'Our advanced AI processes and analyzes your document instantly',
+        icon: <BrainCircuit size={64} strokeWidth={2} />,
+        label: 'We Decode It',
+        description: 'Our smart engine + a dash of humor reads and understands your report.',
     },
     {
-        icon: <FileOutput size={64} strokeWidth={1.5} />,
-        label: 'Get Summary',
-        description: 'Receive a clear, concise summary of your document',
+        icon: <FileOutput size={64} strokeWidth={2} />,
+        label: 'Get a Fun, Friendly Explanation',
+        description: 'No jargon. Just plain, clear English — maybe even a joke or two!',
     }
 ]
 
@@ -45,7 +45,7 @@ const HowItWorksSection = () => {
 
 
                 <div className="text-center mb-16">
-                    <h2 className='font-bold text-xl uppercase mb-4 text-rose-500'>How it works</h2>
+                    <h2 className='font-bold text-xl uppercase mb-4 text-[#1B3669]'>How it works</h2>
                     <h3 className='font-bold text-3xl max-w-2xl mx-auto '>Transform any PDF into an easy-to-digest summary in three simple steps</h3>
                 </div>
 
@@ -55,10 +55,10 @@ const HowItWorksSection = () => {
                             <div className="relative flex items-stretch" key={idx}>
 
                                 {/* stepitem */}
-                                <div className='relative p-6 rounded-2xl bg-white/5 backdrop-blur-xs border-white/10 hover:border-rose-500 transition-colors group w-full' >
+                                <div className='relative p-6 rounded-2xl bg-white/5 backdrop-blur-xs border-white/10 hover:border-[#F0F6FF] transition-colors group w-full' >
                                     <div className="flex flex-col gap-4 h-full ">
-                                        <div className='flex items-center justify-center h-24 w-24 mx-auto rounded-2xl bg-linear-to-br from-rose-500/10 to-transparent group-hover:from-rose-500/20 transition-colors'>
-                                            <div className='text-rose-500'>{step.icon}</div>
+                                        <div className='flex items-center justify-center h-24 w-24 mx-auto rounded-2xl bg-linear-to-br from-rose[#EEF7F7] to-transparent group-hover:from-[#EEF7F7] transition-colors'>
+                                            <div className='text-[#088972]'>{step.icon}</div>
                                         </div>
                                     </div>
 
@@ -69,7 +69,7 @@ const HowItWorksSection = () => {
                                 </div>
 
                                 <div className='hidden md:block absolute top-1/2 -right-4 transform -transalate-y-1/2 z-10'>
-                                    {idx < steps.length - 1 && (<MoveRight size={32} strokeWidth={1} className='text-rose-500' ></MoveRight>)}
+                                    {idx < steps.length - 1 && (<MoveRight size={32} strokeWidth={1} className='text-[#088972]' ></MoveRight>)}
                                 </div>
                             </div>
                         ))

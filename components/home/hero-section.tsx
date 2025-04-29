@@ -23,12 +23,12 @@ export default async function HeroSection() {
                 </div>
 
 
-                <h1 className="font-bold py-6 text-center">
+                <h1 className="font-bold py-6 text-center ">
                     Turn Boring Medical Reports into – {' '}
                     <span className="relative inline-block">
                         <span className="relative z-10 px-2">Mazedar</span>
                         <span
-                            className="absolute inset-0 bg-rose-200/50 -rotate-2 rounded-lg transform -skew-y-1"
+                            className="absolute inset-0 bg-[#088972]/20 -rotate-2 rounded-lg transform -skew-y-1"
                             aria-hidden="true"
                         ></span>
                     </span>

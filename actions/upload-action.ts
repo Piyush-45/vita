@@ -1,6 +1,6 @@
 'use server';
 
-import { generatePdfSummaryFromGemini } from "@/lib/gemini"; // Optional if you want to use Gemini
+import { generatePdfSummaryFromGemini, generatePdfSummaryFromGeminiHindi } from "@/lib/gemini"; // Optional if you want to use Gemini
 import { fetchAndExtractPdfText } from "@/lib/langchain";
 import { PrismaClient } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
@@ -18,6 +18,72 @@ type PdfSummaryType = {
 };
 
 // ✅ Generate summary from uploaded PDF
+// export async function generatePdfSummary(
+//     uploadResponse: [
+//         {
+//             serverData: {
+//                 file: { url: string; name: string };
+//             };
+//         }
+//     ]
+// ) {
+//     if (!uploadResponse || !uploadResponse[0]) {
+//         return { success: false, message: "File upload failed", data: null };
+//     }
+
+//     const {
+//         serverData: {
+//             file: { url: pdfUrl, name: fileName },
+//         },
+//     } = uploadResponse[0];
+
+//     if (!pdfUrl) {
+//         return { success: false, message: "Missing PDF URL", data: null };
+//     }
+
+//     try {
+//         // ✅ Extract text from PDF
+//         const pdfText = await fetchAndExtractPdfText(pdfUrl);
+
+//         // ✅ Generate summary using gemini AI
+//         let summaryText;
+//         try {
+//             summaryText = await generatePdfSummaryFromGemini(pdfText);
+//             console.log(summaryText);
+//         } catch (error) {
+//             console.error("Error generating summary:", error);
+//             return { success: false, message: "AI summary failed", data: null };
+//         }
+
+//         if (!summaryText) {
+//             return {
+//                 success: false,
+//                 message: "Failed to generate summary",
+//                 data: null,
+//             };
+//         }
+
+//         // ✅ Return generated summary to be saved later
+//         return {
+//             success: true,
+//             message: "Summary generated successfully",
+//             data: {
+//                 summary: summaryText,
+//                 fileName,
+//                 fileUrl: pdfUrl,
+//                 title: "", // Optional: you can extract title from summary if needed
+//             },
+//         };
+//     } catch (err) {
+//         console.error(err);
+//         return {
+//             success: false,
+//             message: "Error processing the file",
+//             data: null,
+//         };
+//     }
+// }
+
 export async function generatePdfSummary(
     uploadResponse: [
         {
@@ -25,7 +91,8 @@ export async function generatePdfSummary(
                 file: { url: string; name: string };
             };
         }
-    ]
+    ],
+    language: "en" | "hi" // ✨ NEW PARAM
 ) {
     if (!uploadResponse || !uploadResponse[0]) {
         return { success: false, message: "File upload failed", data: null };
@@ -45,10 +112,16 @@ export async function generatePdfSummary(
         // ✅ Extract text from PDF
         const pdfText = await fetchAndExtractPdfText(pdfUrl);
 
-        // ✅ Generate summary using gemini AI
+        // ✅ Generate summary based on selected language
         let summaryText;
         try {
-            summaryText = await generatePdfSummaryFromGemini(pdfText);
+            if (language === "en") {
+                summaryText = await generatePdfSummaryFromGemini(pdfText);
+            } else if (language === "hi") {
+                summaryText = await generatePdfSummaryFromGeminiHindi(pdfText);
+            } else {
+                throw new Error("Unsupported language selected.");
+            }
             console.log(summaryText);
         } catch (error) {
             console.error("Error generating summary:", error);
@@ -63,7 +136,7 @@ export async function generatePdfSummary(
             };
         }
 
-        // ✅ Return generated summary to be saved later
+        // ✅ Return generated summary
         return {
             success: true,
             message: "Summary generated successfully",
@@ -71,7 +144,7 @@ export async function generatePdfSummary(
                 summary: summaryText,
                 fileName,
                 fileUrl: pdfUrl,
-                title: "", // Optional: you can extract title from summary if needed
+                title: "", // Optional
             },
         };
     } catch (err) {
@@ -83,6 +156,7 @@ export async function generatePdfSummary(
         };
     }
 }
+
 
 // ✅ Save summary to database after ensuring user exists
 export async function savePdfSummary({

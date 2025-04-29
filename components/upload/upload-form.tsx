@@ -12,6 +12,11 @@ import Summary from '../common/Summary';
 import { parseAISummary, ParsedSummary } from '@/lib/parseSummary';
 import { ClientUploadedFileData } from 'uploadthing/types';
 import LoadingScreen from './LoadingScreen';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Label } from '../ui/label';
+
+import HindiSummary from '../common/HindiSummary';
+import { parseAISummaryHindi } from '@/lib/ParseHindiSummary';
 
 
 // Zod schema for file validation
@@ -28,6 +33,7 @@ const UploadForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [parsedSummary, setParsedSummary] = useState<ParsedSummary | null>(null);
 
+    const [language, setLanguage] = useState<'en' | 'hi'>('en');
 
     const { startUpload } = useUploadThing('pdfUploader', {
         onClientUploadComplete: () => { toast.success("Your PDF has been uploaded successfully") },
@@ -75,7 +81,7 @@ const UploadForm = () => {
 
         // Generate summary
         const summaryToastId = toast.loading('Generating summary...');
-        const summary = await generatePdfSummary(resp);
+        const summary = await generatePdfSummary(resp, language);
 
         if (!summary.success || !summary.data?.summary) {
             toast.error(summary.message ?? "Summary failed", { id: summaryToastId });
@@ -88,11 +94,15 @@ const UploadForm = () => {
 
             // Save summary to DB using correct fields
 
-
             // Parse the summary text into structured data
             try {
-                const parsed = parseAISummary(summaryText);
-                setParsedSummary(parsed);
+                if (language === "hi") {
+                    const parsed = parseAISummaryHindi(summaryText);
+                    setParsedSummary(parsed);
+                } else {
+                    const parsed = parseAISummary(summaryText);
+                    setParsedSummary(parsed);
+                }
 
                 await storePdfSummaryAction({
                     summary: summaryText,
@@ -120,14 +130,24 @@ const UploadForm = () => {
 
     return (
         <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto">
-            <UploadFormInput onSubmit={onSubmit} isLoading={isLoading} />
+            <UploadFormInput
+                onSubmit={onSubmit}
+                isLoading={isLoading}
+                language={language}
+                setLanguage={setLanguage}
+            />
 
             {isLoading ? (
                 <LoadingScreen />
             ) : parsedSummary ? (
-                <Summary parsedSummary={parsedSummary} />
+                language === 'en' ? (
+                    <Summary parsedSummary={parsedSummary} />
+                ) : (
+                    <HindiSummary parsedSummary={parsedSummary} />
+                )
             ) : null}
         </div>
+
     );
 };
 
@@ -136,12 +156,16 @@ export default UploadForm;
 interface UploadFormInputProps {
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     isLoading: boolean;
+    language: 'en' | 'hi';
+    setLanguage: React.Dispatch<React.SetStateAction<'en' | 'hi'>>;
 }
 
+
 // Reusable input form component
-const UploadFormInput: React.FC<UploadFormInputProps> = ({ onSubmit, isLoading }) => {
+const UploadFormInput: React.FC<UploadFormInputProps> = ({ onSubmit, isLoading, language, setLanguage }) => {
     return (
         <form className="flex flex-col gap-6" onSubmit={onSubmit}>
+
             <div className="flex justify-end items-center gap-1.5">
                 <Input
                     type="file"
@@ -154,6 +178,32 @@ const UploadFormInput: React.FC<UploadFormInputProps> = ({ onSubmit, isLoading }
                     {isLoading ? "Processing..." : "Upload your PDF"}
                 </Button>
             </div>
+
+            <div className="flex flex-col gap-4">
+                <Label className="text-base font-semibold">Select Language</Label>
+
+                <div className="flex gap-4">
+                    {[
+                        { id: 'en', label: 'English' },
+                        { id: 'hi', label: 'Hindi' }
+                    ].map(({ id, label }) => (
+                        <button
+                            key={id}
+                            type="button"
+                            onClick={() => setLanguage(id as 'en' | 'hi')}
+                            className={`
+      px-6 py-2 rounded-lg border text-sm font-medium transition-all
+      ${language === id
+                                    ? 'bg-primary text-white border-primary shadow-sm'
+                                    : 'bg-muted hover:bg-muted/70 border-muted-foreground/20'}
+    `}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
         </form>
     );
 };

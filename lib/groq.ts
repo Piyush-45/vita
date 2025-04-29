@@ -1,6 +1,6 @@
 // lib/groq.ts
 import { OpenAI } from "openai";
-import { FUNNY_SUMMARY_SYSTEM_PROMPT2, } from "./promt";
+import { FUNNY_SUMMARY_SYSTEM_PROMPT2, FUNNY_SUMMARY_SYSTEM_PROMPT_HINDI, } from "./promt";
 
 export const groq = new OpenAI({
     apiKey: process.env.GROQ_API_KEY, // 🔑 Get from Groq Console
@@ -16,7 +16,7 @@ export const generatePdfSummaryFromGroq = async (pdfText: string) => {
             messages: [
                 {
                     role: "system",
-                    content: FUNNY_SUMMARY_SYSTEM_PROMPT2,
+                    content: FUNNY_SUMMARY_SYSTEM_PROMPT_HINDI,
                 },
                 {
                     role: "user",

@@ -1,11 +1,11 @@
 'use server';
 
-import { generatePdfSummaryFromGemini, generatePdfSummaryFromGeminiHindi } from "@/lib/gemini"; // Optional if you want to use Gemini
+import { generatePdfSummaryFromGemini, generatePdfSummaryFromGeminiGenz, generatePdfSummaryFromGeminiHindi } from "@/lib/gemini"; // Optional if you want to use Gemini
 import { fetchAndExtractPdfText } from "@/lib/langchain";
 import { PrismaClient } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/clerk-sdk-node";
-import { generatePdfSummaryFromGroq } from "@/lib/groq";
+import { generatePdfSummaryFromGroq, generatePdfSummaryFromGroqGenz } from "@/lib/groq";
 
 const prisma = new PrismaClient();
 
@@ -92,7 +92,7 @@ export async function generatePdfSummary(
             };
         }
     ],
-    language: "en" | "hi" // ✨ NEW PARAM
+    language: "en" | "hi" | "genz" // ✨ NEW PARAM
 ) {
     if (!uploadResponse || !uploadResponse[0]) {
         return { success: false, message: "File upload failed", data: null };
@@ -115,12 +115,14 @@ export async function generatePdfSummary(
         // ✅ Generate summary based on selected language
         let summaryText;
         try {
-            if (language === "en") {
-                summaryText = await generatePdfSummaryFromGemini(pdfText);
-            } else if (language === "hi") {
+            if (language === "hi") {
                 summaryText = await generatePdfSummaryFromGeminiHindi(pdfText);
+            } else if (language === "en") {
+                summaryText = await generatePdfSummaryFromGemini(pdfText);
+            } else if (language === 'genz') {
+                summaryText = await generatePdfSummaryFromGeminiGenz(pdfText);
             } else {
-                throw new Error("Unsupported language selected.");
+                console.log("language selecting error")
             }
             console.log(summaryText);
         } catch (error) {

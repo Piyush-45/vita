@@ -9,14 +9,15 @@ import { useUploadThing } from '@/lib/uploadthing';
 import { toast } from 'sonner';
 import { generatePdfSummary, storePdfSummaryAction } from '@/actions/upload-action';
 import Summary from '../common/Summary';
-import { parseAISummary, ParsedSummary } from '@/lib/parseSummary';
+
 import { ClientUploadedFileData } from 'uploadthing/types';
 import LoadingScreen from './LoadingScreen';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
-
-import HindiSummary from '../common/HindiSummary';
 import { parseAISummaryHindi } from '@/lib/ParseHindiSummary';
+import HindiSummary from '../common/HindiSummary';
+import { parseAISummary, ParsedSummary, parseGenZSummary } from '@/lib/parseSummary';
+import SummaryGenZ from '../common/GenzSummary';
 
 
 // Zod schema for file validation
@@ -33,7 +34,7 @@ const UploadForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [parsedSummary, setParsedSummary] = useState<ParsedSummary | null>(null);
 
-    const [language, setLanguage] = useState<'en' | 'hi'>('en');
+    const [language, setLanguage] = useState<'en' | 'hi' | 'genz'>('en');
 
     const { startUpload } = useUploadThing('pdfUploader', {
         onClientUploadComplete: () => { toast.success("Your PDF has been uploaded successfully") },
@@ -99,9 +100,12 @@ const UploadForm = () => {
                 if (language === "hi") {
                     const parsed = parseAISummaryHindi(summaryText);
                     setParsedSummary(parsed);
-                } else {
+                } else if (language === 'genz') {
                     const parsed = parseAISummary(summaryText);
                     setParsedSummary(parsed);
+                } else if (language === 'en') {
+                    const parsed = parseGenZSummary(summaryText)
+                    setParsedSummary(parsed)
                 }
 
                 await storePdfSummaryAction({
@@ -142,6 +146,8 @@ const UploadForm = () => {
             ) : parsedSummary ? (
                 language === 'en' ? (
                     <Summary parsedSummary={parsedSummary} />
+                ) : language === 'genz' ? (
+                    <SummaryGenZ parsedSummary={parsedSummary} />
                 ) : (
                     <HindiSummary parsedSummary={parsedSummary} />
                 )
@@ -156,8 +162,8 @@ export default UploadForm;
 interface UploadFormInputProps {
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     isLoading: boolean;
-    language: 'en' | 'hi';
-    setLanguage: React.Dispatch<React.SetStateAction<'en' | 'hi'>>;
+    language: 'en' | 'hi' | 'genz';
+    setLanguage: React.Dispatch<React.SetStateAction<'en' | 'hi' | 'genz'>>;
 }
 
 
@@ -185,12 +191,13 @@ const UploadFormInput: React.FC<UploadFormInputProps> = ({ onSubmit, isLoading, 
                 <div className="flex gap-4">
                     {[
                         { id: 'en', label: 'English' },
-                        { id: 'hi', label: 'Hindi' }
+                        { id: 'hi', label: 'Hindi' },
+                        { id: 'genz', label: 'Gen Z 🧃' }
                     ].map(({ id, label }) => (
                         <button
                             key={id}
                             type="button"
-                            onClick={() => setLanguage(id as 'en' | 'hi')}
+                            onClick={() => setLanguage(id as 'en' | 'hi' | 'genz')}
                             className={`
       px-6 py-2 rounded-lg border text-sm font-medium transition-all
       ${language === id

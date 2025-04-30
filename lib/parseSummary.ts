@@ -54,7 +54,7 @@ export function parseAISummary(summaryText: string): ParsedSummary {
         }
 
         // Extract importance (Why this test matters)
-        const importanceMatch = section.match(/🧠\s+\*\*Why this test matters\*\*:\s+([^\n]+)/);
+        const importanceMatch = section.match(/🧠\s+\*\*Why this slaps\*\*:\s+([^\n]+)/);
         if (importanceMatch) {
             test.importance = importanceMatch[1].trim();
         }
@@ -96,6 +96,91 @@ export function parseAISummary(summaryText: string): ParsedSummary {
         }
 
         // Extract verdict
+        const verdictMatch = section.match(/🎯\s+\*\*Final Vibe Check\*\*:\s+([^\n]+)/);
+        if (verdictMatch) {
+            test.verdict = verdictMatch[1].trim();
+        }
+
+        tests.push(test);
+    });
+
+    return { tests, finalTip };
+}
+
+
+export function parseGenZSummary(summaryText: string): ParsedSummary {
+    const tests: TestResult[] = [];
+    let finalTip = "";
+
+    // Extract final tip (👉 **"some tip"**)
+    const finalTipMatch = summaryText.match(/👉\s+\*\*"([^"]+)"\*\*/);
+    if (finalTipMatch) {
+        finalTip = finalTipMatch[1].trim();
+    }
+
+    // Split all test sections
+    const testSections = summaryText.split(/##\s+🧪\s+\*\*Test\*\*:\s*/i).filter(Boolean);
+
+    testSections.forEach(section => {
+        const test: TestResult = {
+            name: "",
+            nickname: null,
+            icon: "🧪",
+            importance: "",
+            result: "",
+            status: "normal",
+            explanation: "",
+            tip: "",
+            verdict: ""
+        };
+
+        // Match name and nickname
+        const nameMatch = section.match(/\*\*(.*?)\*\*/);
+        if (nameMatch) {
+            // Extract name and nickname if present in parentheses
+            const nameWithNickname = nameMatch[1].trim();
+            const parenMatch = nameWithNickname.match(/^([^(]+)\s*\(([^)]+)\)/);
+            if (parenMatch) {
+                test.name = parenMatch[1].trim();
+                test.nickname = parenMatch[2].trim();
+            } else {
+                test.name = nameWithNickname;
+                test.nickname = null;
+            }
+        }
+
+        // Importance section
+        const importanceMatch = section.match(/🧠\s+\*\*Why this test matters\*\*:\s+([\s\S]*?)\n\n|📊/);
+        if (importanceMatch) {
+            test.importance = importanceMatch[1]?.trim() || "";
+        }
+
+        // Results
+        const resultMatch = section.match(/📊\s+\*\*Results\*\*:\s+([^\n(]+)\s*\(([^)]+)\)\s*—?\s*(.*)/);
+        if (resultMatch) {
+            const valuePart = resultMatch[1].trim();
+            const statusMarker = resultMatch[2].toLowerCase();
+            const explanationPart = resultMatch[3].trim();
+
+            test.result = valuePart;
+            test.explanation = explanationPart;
+
+            if (statusMarker.includes("low")) {
+                test.status = "low";
+            } else if (statusMarker.includes("high")) {
+                test.status = "high";
+            } else {
+                test.status = "normal";
+            }
+        }
+
+        // Tiny Tip
+        const tipMatch = section.match(/🩺\s+\*\*Tiny Tip\*\*:\s+([^\n]+)/);
+        if (tipMatch) {
+            test.tip = tipMatch[1].trim();
+        }
+
+        // Verdict
         const verdictMatch = section.match(/🎯\s+\*\*Verdict & Vibes\*\*:\s+([^\n]+)/);
         if (verdictMatch) {
             test.verdict = verdictMatch[1].trim();
